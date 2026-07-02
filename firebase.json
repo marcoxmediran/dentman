@@ -1,0 +1,24 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "dental-app-5db1f",
+          "appId": "1:354050747943:android:634427e3125ade6f202802",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "dental-app-5db1f",
+          "configurations": {
+            "android": "1:354050747943:android:634427e3125ade6f202802"
+          }
+        }
+      }
+    }
+  }
+}
