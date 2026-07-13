@@ -6,6 +6,7 @@ import '../../theme/app_theme.dart';
 import '../appointments/appointments_screen.dart';
 import '../patients/patients_screen.dart';
 import '../settings/settings_screen.dart';
+import '../dentists/dentists_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -17,7 +18,11 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [AppointmentsScreen(), PatientsScreen()];
+  final List<Widget> _screens = const [
+    AppointmentsScreen(),
+    PatientsScreen(),
+    DentistsScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +135,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               icon: Icon(Icons.people_alt_rounded),
               activeIcon: Icon(Icons.people_alt),
               label: 'Patients',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.badge_outlined),
+              activeIcon: Icon(Icons.badge),
+              label: 'Dentists',
             ),
           ],
         ),

@@ -21,6 +21,8 @@ abstract class DatabaseRepository {
   // Treatments
   Stream<List<Treatment>> watchTreatmentsForPatient(String patientId);
   Future<List<Treatment>> getTreatmentsForPatient(String patientId);
+  Stream<List<Treatment>> watchAllTreatments();
+  Future<List<Treatment>> getAllTreatments();
   Future<void> addTreatment(Treatment treatment);
   Future<void> updateTreatment(Treatment treatment);
   Future<void> deleteTreatment(String id, String patientId);

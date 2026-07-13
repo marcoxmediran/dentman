@@ -143,6 +143,27 @@ class FirestoreDatabaseRepository implements DatabaseRepository {
   }
 
   @override
+  Stream<List<Treatment>> watchAllTreatments() {
+    return _treatmentsRef.snapshots().map((snapshot) {
+      final list = snapshot.docs
+          .map((doc) => Treatment.fromJson(doc.data(), doc.id))
+          .toList();
+      list.sort((a, b) => b.date.compareTo(a.date));
+      return list;
+    });
+  }
+
+  @override
+  Future<List<Treatment>> getAllTreatments() async {
+    final snapshot = await _treatmentsRef.get();
+    final list = snapshot.docs
+        .map((doc) => Treatment.fromJson(doc.data(), doc.id))
+        .toList();
+    list.sort((a, b) => b.date.compareTo(a.date));
+    return list;
+  }
+
+  @override
   Future<void> addTreatment(Treatment treatment) async {
     await _treatmentsRef.add(treatment.toJson());
   }

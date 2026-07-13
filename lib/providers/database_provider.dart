@@ -46,6 +46,11 @@ final patientTreatmentsStreamProvider = StreamProvider.family<List<Treatment>, S
   return repository.watchTreatmentsForPatient(patientId);
 });
 
+final allTreatmentsStreamProvider = StreamProvider<List<Treatment>>((ref) {
+  final repository = ref.watch(databaseRepositoryProvider);
+  return repository.watchAllTreatments();
+});
+
 // Future Providers
 final patientAppointmentsFutureProvider = FutureProvider.family<List<Appointment>, String>((ref, patientId) {
   final repository = ref.watch(databaseRepositoryProvider);

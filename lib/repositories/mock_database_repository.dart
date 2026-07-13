@@ -20,6 +20,7 @@ class MockDatabaseRepository implements DatabaseRepository {
   final _appointmentsController =
       StreamController<List<Appointment>>.broadcast();
   final _dentistsController = StreamController<List<Dentist>>.broadcast();
+  final _allTreatmentsController = StreamController<List<Treatment>>.broadcast();
   // We can track individual patient treatment stream controllers if we want, or keep a map
   final _treatmentControllers = <String, StreamController<List<Treatment>>>{};
 
@@ -169,6 +170,7 @@ class MockDatabaseRepository implements DatabaseRepository {
     _notifyPatients();
     _notifyAppointments();
     _notifyDentists();
+    _notifyAllTreatments();
   }
 
   // Helper methods to update streams
@@ -206,6 +208,12 @@ class MockDatabaseRepository implements DatabaseRepository {
         List.unmodifiable(patientTreatments),
       );
     }
+  }
+
+  void _notifyAllTreatments() {
+    final list = List<Treatment>.from(_treatments);
+    list.sort((a, b) => b.date.compareTo(a.date));
+    _allTreatmentsController.add(List.unmodifiable(list));
   }
 
   // --- DatabaseRepository Implementation ---
@@ -314,11 +322,26 @@ class MockDatabaseRepository implements DatabaseRepository {
   }
 
   @override
+  Stream<List<Treatment>> watchAllTreatments() {
+    Timer.run(() => _notifyAllTreatments());
+    return _allTreatmentsController.stream;
+  }
+
+  @override
+  Future<List<Treatment>> getAllTreatments() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    final list = List<Treatment>.from(_treatments);
+    list.sort((a, b) => b.date.compareTo(a.date));
+    return List.unmodifiable(list);
+  }
+
+  @override
   Future<void> addTreatment(Treatment treatment) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final newTreatment = treatment.copyWith(id: _uuid.v4());
     _treatments.add(newTreatment);
     _notifyTreatmentsForPatient(treatment.patientId);
+    _notifyAllTreatments();
   }
 
   @override
@@ -335,6 +358,7 @@ class MockDatabaseRepository implements DatabaseRepository {
     if (index != -1) {
       _treatments[index] = treatment;
       _notifyTreatmentsForPatient(treatment.patientId);
+      _notifyAllTreatments();
     }
   }
 
@@ -343,6 +367,7 @@ class MockDatabaseRepository implements DatabaseRepository {
     await Future.delayed(const Duration(milliseconds: 200));
     _treatments.removeWhere((t) => t.id == id);
     _notifyTreatmentsForPatient(patientId);
+    _notifyAllTreatments();
   }
 
   // --- Dentist CRUD Implementation ---
