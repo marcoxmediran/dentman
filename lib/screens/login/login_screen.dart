@@ -202,9 +202,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               value: useMock,
                               onChanged: (val) {
                                 ref
-                                        .read(useMockDatabaseProvider.notifier)
-                                        .state =
-                                    val;
+                                    .read(useMockDatabaseProvider.notifier)
+                                    .toggle(val);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(

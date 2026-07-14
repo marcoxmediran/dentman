@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../repositories/database_repository.dart';
 import '../repositories/mock_database_repository.dart';
 import '../repositories/firestore_database_repository.dart';
@@ -7,8 +8,28 @@ import '../models/appointment.dart';
 import '../models/treatment.dart';
 import '../models/dentist.dart';
 
-// StateProvider to toggle between Mock and Live Firebase Database
-final useMockDatabaseProvider = StateProvider<bool>((ref) => true);
+// Provider for SharedPreferences instance (to be overridden in main.dart)
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('sharedPreferencesProvider must be overridden in ProviderScope');
+});
+
+class UseMockDatabaseNotifier extends StateNotifier<bool> {
+  final SharedPreferences _prefs;
+
+  UseMockDatabaseNotifier(this._prefs)
+      : super(_prefs.getBool('use_mock_db') ?? true);
+
+  void toggle(bool value) {
+    _prefs.setBool('use_mock_db', value);
+    state = value;
+  }
+}
+
+// StateNotifierProvider to toggle between Mock and Live Firebase Database
+final useMockDatabaseProvider = StateNotifierProvider<UseMockDatabaseNotifier, bool>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return UseMockDatabaseNotifier(prefs);
+});
 
 // Expose the active DatabaseRepository based on the toggle
 final databaseRepositoryProvider = Provider<DatabaseRepository>((ref) {

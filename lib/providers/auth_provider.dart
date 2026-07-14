@@ -47,10 +47,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void _checkCurrentAuthState() {
     final useMock = _ref.read(useMockDatabaseProvider);
     if (useMock) {
-      // In mock mode, keep current state or default to authenticated for easier testing
-      // Actually, let's default to NOT authenticated in mock too, so the login page can be demonstrated,
-      // but allow immediate login with preset credentials.
-      state = AuthState(isAuthenticated: false, isLoading: false);
+      final prefs = _ref.read(sharedPreferencesProvider);
+      final isMockAuth = prefs.getBool('mock_is_authenticated') ?? false;
+      final mockEmail = prefs.getString('mock_email');
+      state = AuthState(
+        isAuthenticated: isMockAuth,
+        isLoading: false,
+        email: mockEmail,
+      );
     } else {
       // Listen to Firebase Auth state
       final user = firebase_auth.FirebaseAuth.instance.currentUser;
@@ -69,6 +73,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (useMock) {
       await Future.delayed(const Duration(seconds: 1)); // Mock latency
       if (email.trim() == 'mock@email.com' && password == 'mock123') {
+        final prefs = _ref.read(sharedPreferencesProvider);
+        await prefs.setBool('mock_is_authenticated', true);
+        await prefs.setString('mock_email', 'mock@email.com');
         state = AuthState(
           isAuthenticated: true,
           isLoading: false,
@@ -120,6 +127,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (useMock) {
       await Future.delayed(const Duration(milliseconds: 500));
+      final prefs = _ref.read(sharedPreferencesProvider);
+      await prefs.remove('mock_is_authenticated');
+      await prefs.remove('mock_email');
       state = AuthState.initial();
     } else {
       await firebase_auth.FirebaseAuth.instance.signOut();
