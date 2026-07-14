@@ -30,7 +30,7 @@ All database queries and mutations must flow through our abstract repository sys
 
 ---
 
-## 3. State Management (Riverpod)
+## 3. State Management & Persistence (Riverpod)
 
 We use **standard, non-codegen Riverpod providers** for state mapping and repository injection:
 
@@ -39,10 +39,15 @@ We use **standard, non-codegen Riverpod providers** for state mapping and reposi
     *   `*FutureProvider` for futures (e.g., `patientAppointmentsFutureProvider`).
     *   `*Provider` for read-only injections (e.g., `databaseRepositoryProvider`).
 2.  **No Code Generation**: Do not introduce code-generation annotations (`@riverpod`) or run `build_runner` for provider definitions. Keep definitions clean and manually declared in `lib/providers/database_provider.dart`.
+3.  **Local Storage Persistence**:
+    *   We use the `shared_preferences` package to persist simple local preferences (e.g., `useMock` database settings, mock authentication state).
+    *   Initialize `SharedPreferences` in `main()` before calling `runApp()`.
+    *   Register the instance through `sharedPreferencesProvider` in the root `ProviderScope` override.
+    *   StateNotifiers that manage persistent values (such as `UseMockDatabaseNotifier`) must read their initial state from SharedPreferences and update SharedPreferences whenever their state changes.
 
 ---
 
-## 5. UI Layout & Design System
+## 4. UI Layout & Design System
 
 1.  **Theme Tokens**: Always use the brand palette and styles defined in `AppTheme` (in `lib/theme/app_theme.dart`). Do not use raw hex colors or inline custom TextStyles.
 2.  **Text Styling**: Access text styles via the MaterialApp text theme: `Theme.of(context).textTheme.titleMedium` (or other appropriate sizes).
@@ -53,8 +58,10 @@ We use **standard, non-codegen Riverpod providers** for state mapping and reposi
 
 ---
 
-## 6. Coding Style & Quality Assurance
+## 5. Coding Style & Quality Assurance
 
 1.  **Explicit Type Declarations**: Always use explicit types for variable declarations (e.g., `final Dentist dentist = dentists[index];` or `final Treatment treatment = filtered[index];`), especially within builders, list view items, loops, and stream mapping. This prevents unused import warnings and ensures strict compile-time safety.
 2.  **Static Analysis**: Code changes must be warning-free. Always verify updates by running `flutter analyze`. Address any unused imports, deprecated properties, or type mismatches immediately.
-3.  **Unit & Widget Testing**: Ensure that any changes do not break widget or unit tests. Run `flutter test` before completing tasks.
+3.  **Unit & Widget Testing**:
+    *   Ensure that any changes do not break widget or unit tests. Run `flutter test` before completing tasks.
+    *   Any widget tests rendering views that use persistent features must mock SharedPreferences by calling `SharedPreferences.setMockInitialValues(...)` and overriding `sharedPreferencesProvider` in the test's `ProviderScope` to avoid runtime failures.
